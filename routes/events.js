@@ -17,6 +17,7 @@ var router = express.Router();
  * }
  * */
 router.post('/create', function(req, res, next) {
+  console.log(req.body);
   let lat = req.body.lat;
   let lng = req.body.lng;
   let datetime = req.body.datetime;
@@ -27,14 +28,14 @@ router.post('/create', function(req, res, next) {
   console.log(sql);
   let query = conn.query(sql, data, (err, results) => {
     if(err){
+      console.log(err);
       res.json({
         data: err
       })
     }
     else{
-      res.json({
-        data: results
-      })
+      console.log("success");
+      res.redirect('/read');
     }
   });
 });
@@ -59,7 +60,9 @@ router.get('/read', function(req, res, next) {
       })
     }else{
       res.json({
-        users: results
+        status: 200,
+        message: "hello world",
+        data: results
       })
     };
   });
@@ -78,7 +81,9 @@ router.get('/read/:id', function(req, res, next) {
       })
     }else{
       res.json({
-        user: results
+        status: 200,
+        message: "hello world",
+        data: results
       })
     };
   });
@@ -94,35 +99,35 @@ router.get('/read/:id', function(req, res, next) {
  * }
  * */
 router.put('/update', function(req, res, next) {
+  console.log(req);
+  console.log(req.body);
   let id = parseInt(req.body.id);
   let lat = req.body.lat;
   let lng = req.body.lng;
-  let datetime = req.body.datetime;
+  let datetime = req.body.datetime.replace(/T|Z/gi, " ").trim();
   let host = parseInt(req.body.host)
   let description = req.body.description;
   let data = { lat: lat, lng: lng, datetime: datetime, host: host, description: description };
   let sql = "UPDATE event SET ? WHERE id = ?";  
   let query = conn.query(sql, [data,id], (err, results) => {
     if(err){
+      console.log(err);
       res.json({
         data: err
       })
     }
     else{
-      res.json({
-        data: results
-      })
+      res.redirect('/read');
     }
   });
 });
 
 /* * 
  * Delete event
- * http://127.0.0.1:8080/events/delete
- * { "id" : 1 }
+ * http://127.0.0.1:8080/events/delete/1
  * */
-router.delete('/delete', function(req, res, next) {
-  let id = parseInt(req.body.id);
+router.delete('/delete/:id', function(req, res, next) {
+  let id = parseInt(req.params.id);
   let sql = "DELETE FROM event WHERE id = ?";  
   let query = conn.query(sql, [id], (err, results) => {
     if(err){
@@ -131,9 +136,7 @@ router.delete('/delete', function(req, res, next) {
       })
     }
     else{
-      res.json({
-        data: results
-      })
+      res.redirect('/read');
     }
   });
 });
